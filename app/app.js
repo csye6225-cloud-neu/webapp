@@ -20,7 +20,6 @@ const initialize = async (app) => {
 		console.error("Unable to connect to the database:", error);
 	}
 
-	// Add a to check the database connection
 	app.use(async (req, res, next) => {
 		try {
 			// Check if the connection is alive by pinging the database
