@@ -4,13 +4,12 @@ import initializeRoutes from "./routes/index.js";
 
 const initialize = async (app) => {
 	app.use(express.json()); // Parse incoming JSON payloads
-	app.use(express.urlencoded({ extended: true })); // Parse URL-encoded bodies
 
 	// Option 3: Passing parameters separately (other dialects)
-	const sequelize = new Sequelize("information_schema", process.env.USERNAME, process.env.PASSWORD, {
+	const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
 		// Use the default database to test the connection
-		host: "localhost",
-		dialect: "mysql",
+		host: process.env.DB_HOST,
+		dialect: process.env.DB_DIALECT,
 	});
 
 	try {
