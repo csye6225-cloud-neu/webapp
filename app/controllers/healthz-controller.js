@@ -1,6 +1,6 @@
 import { setReponse } from "./response-handler.js";
 
-export const search = async (req, res, next) => {
+export const search = async (req, res) => {
 	try {
         // return 400 if content-type is present as it is likely that the request has a payload
         const contentType = req.headers['content-type'];
