@@ -39,10 +39,17 @@ const Account = sequelize.define(
 );
 
 const saltRounds = 10;
+
+Account.beforeBulkCreate(async (accounts) => {
+	for (const account of accounts) {
+		const salt = await bcrypt.genSalt(saltRounds);
+		account.password = await bcrypt.hash(account.password, salt);
+	}
+});
+
 Account.beforeCreate(async (account) => {
 	const salt = await bcrypt.genSalt(saltRounds);
 	account.password = await bcrypt.hash(account.password, salt);
-	console.log(`**********account.password: ${account.password}`);
 });
 
 Account.beforeUpdate(async (account) => {
