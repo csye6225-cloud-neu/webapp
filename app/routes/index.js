@@ -1,9 +1,12 @@
-import * as healthzController from "../controllers/healthz-controller.js";
+import express from "express";
+import healthzRoute from "./healthz-route.js";
+import userRoute from "./user-route.js";
 
 const initializeRoutes = (app) => {
-	app.get('/healthz', healthzController.search); // Handle GET requests to /healthz
-	app.all("/healthz", healthzController.notAllowed); // Catch other methods
-    app.all("/*", healthzController.notFound); // Catch all other endpoints
+
+	app.use('/healthz', healthzRoute);
+	app.use('/v1/user', userRoute);
+    // app.all("/*", healthzController.notFound); // Catch all other endpoints
 };
 
 export default initializeRoutes;

@@ -1,16 +1,9 @@
 import express from "express";
-import { Sequelize } from "sequelize";
 import initializeRoutes from "./routes/index.js";
+import { sequelize } from "./config/database.js";
 
 const initialize = async (app) => {
 	app.use(express.json()); // Parse incoming JSON payloads
-
-	// Option 3: Passing parameters separately (other dialects)
-	const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERNAME, process.env.DB_PASSWORD, {
-		// Use the default database to test the connection
-		host: process.env.DB_HOST,
-		dialect: process.env.DB_DIALECT,
-	});
 
 	try {
 		await sequelize.authenticate();
@@ -19,13 +12,40 @@ const initialize = async (app) => {
 		console.error("Unable to connect to the database:", error);
 	}
 
+	// bootstrap the database
+	try {
+		await sequelize.sync({force: true});
+		console.log("All models were synchronized successfully.");
+
+		// Bootstrap the database with some dummy data
+		if ((await sequelize.models.Account.count()) === 0) {
+			await sequelize.models.Account.bulkCreate([
+				{
+					firstName: "John",
+					lastName: "Doe",
+					email: "jjj@gmail.com",
+					password: "password",
+				},
+				{
+					firstName: "Jane",
+					lastName: "Doe",
+					email: "jdoe@email.com",
+					password: "123456",
+				},
+			]);
+			console.log("Database bootstrapped with initial users");
+		}
+	} catch (error) {
+		console.error("Unable to synchronize the database:", error);
+	}
+
 	app.use(async (req, res, next) => {
 		try {
 			// Check if the connection is alive by pinging the database
 			await sequelize.query("SELECT 1");
 			next(); // Continue if the connection is alive
 		} catch (error) {
-            console.error("Error pinging the database:", error);
+			console.error("Error pinging the database:", error);
 			res.status(503).send();
 		}
 	});
