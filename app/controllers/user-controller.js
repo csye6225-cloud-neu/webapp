@@ -5,9 +5,10 @@ export const search = async (req, res) => {
     if (req.method === "HEAD") return setReponse(res, 405); // Method Not Allowed
 	try {
 		const result = await userService.authenticate(req, res);
+		const { password, ...resultWithoutPassword } = result.dataValues;
         if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
 
-		setReponseWithData(res, 200, result); // OK
+		setReponseWithData(res, 200, resultWithoutPassword); // OK
 	} catch (error) {
         console.log(error)
 		setReponse(res, 503); // Service Unavailable
@@ -20,8 +21,9 @@ export const update = async (req, res) => {
         if (res1 === "Unauthorized") return setReponse(res, 401); // Unauthorized
         console.log(res1)
 		const result = await userService.update(res1.id, {...req.body});
+		const { password, ...resultWithoutPassword } = result.dataValues;
 		if (result === "not found") return setReponse(res, 404); // Not Found
-		setReponseWithData(res, 204, result); // No Content
+		setReponseWithData(res, 204, resultWithoutPassword); // No Content
 	} catch (error) {
         console.log(error)
 		setReponse(res, 503); // Service Unavailable
@@ -32,7 +34,8 @@ export const post = async (req, res) => {
 	try {
 		const result = await userService.post(req.body);
 		if (result === "duplicate") return setReponse(res, 400); // Bad Request
-		setReponseWithData(res, 201, result); // Created
+		const { password, ...resultWithoutPassword } = result.dataValues;
+		setReponseWithData(res, 201, resultWithoutPassword); // Created
 	} catch (error) {
 		console.error(error);
 		setReponse(res, 503); // Service Unavailable

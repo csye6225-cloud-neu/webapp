@@ -10,11 +10,11 @@ const Account = sequelize.define(
 			defaultValue: DataTypes.UUIDV4, // generate a UUIDv4 as the default value
 			primaryKey: true,
 		},
-		firstName: {
+		first_name: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
-		lastName: {
+		last_name: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
@@ -33,16 +33,23 @@ const Account = sequelize.define(
 	},
 	{
 		timestamps: true,
-		createdAt: "accountCreated",
-		updatedAt: "accountUpdated",
+		createdAt: "account_created",
+		updatedAt: "account_updated",
 	}
 );
 
 const saltRounds = 10;
+
+Account.beforeBulkCreate(async (accounts) => {
+	for (const account of accounts) {
+		const salt = await bcrypt.genSalt(saltRounds);
+		account.password = await bcrypt.hash(account.password, salt);
+	}
+});
+
 Account.beforeCreate(async (account) => {
 	const salt = await bcrypt.genSalt(saltRounds);
 	account.password = await bcrypt.hash(account.password, salt);
-	console.log(`**********account.password: ${account.password}`);
 });
 
 Account.beforeUpdate(async (account) => {
