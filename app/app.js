@@ -21,14 +21,14 @@ const initialize = async (app) => {
 		if ((await sequelize.models.Account.count()) === 0) {
 			await sequelize.models.Account.bulkCreate([
 				{
-					firstName: "John",
-					lastName: "Doe",
+					first_name: "John",
+					last_name: "Doe",
 					email: "jjj@gmail.com",
 					password: "password",
 				},
 				{
-					firstName: "Jane",
-					lastName: "Doe",
+					first_name: "Jane",
+					last_name: "Doe",
 					email: "jdoe@email.com",
 					password: "123456",
 				},

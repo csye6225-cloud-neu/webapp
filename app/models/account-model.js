@@ -10,11 +10,11 @@ const Account = sequelize.define(
 			defaultValue: DataTypes.UUIDV4, // generate a UUIDv4 as the default value
 			primaryKey: true,
 		},
-		firstName: {
+		first_name: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
-		lastName: {
+		last_name: {
 			type: DataTypes.STRING,
 			allowNull: false,
 		},
@@ -33,8 +33,8 @@ const Account = sequelize.define(
 	},
 	{
 		timestamps: true,
-		createdAt: "accountCreated",
-		updatedAt: "accountUpdated",
+		createdAt: "account_created",
+		updatedAt: "account_updated",
 	}
 );
 
