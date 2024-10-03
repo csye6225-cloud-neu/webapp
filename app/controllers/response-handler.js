@@ -9,3 +9,15 @@ export const setReponse = (res, status) => {
 	res.set("Cache-Control", "no-cache, no-store, must-revalidate;"); // Disable caching
 	res.send();
 };
+
+/*
+ * setReponseWithData function is used to set the response status and headers - with payload
+ * @param {object} res - response
+ * @param {number} status - status code
+ * @param {object} data - payload
+ * @returns {void}
+ */
+export const setReponseWithData = (res, status, data) => {
+	res.json(data);
+	setReponse(res, status);
+}
