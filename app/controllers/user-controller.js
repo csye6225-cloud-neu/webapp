@@ -19,7 +19,18 @@ export const update = async (req, res) => {
 	try {
 		const res1 = await userService.authenticate(req, res);
         if (res1 === "Unauthorized") return setReponse(res, 401); // Unauthorized
-        console.log(res1)
+
+		// check if contains any other fields
+		const allowedFields = ['first_name', 'last_name', 'password']; // Fields allowed to be updated
+
+		// Extract fields from the request body
+		const updateFields = Object.keys(req.body);
+	  
+		// Check if all fields in the request are allowed
+		const isValidUpdate = updateFields.every(field => allowedFields.includes(field));
+	  
+		if (!isValidUpdate) return setReponse(res, 400); // Bad Request
+		
 		const result = await userService.update(res1.id, {...req.body});
 		const { password, ...resultWithoutPassword } = result.dataValues;
 		if (result === "not found") return setReponse(res, 404); // Not Found
