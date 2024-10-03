@@ -18,6 +18,7 @@ export const setReponse = (res, status) => {
  * @returns {void}
  */
 export const setReponseWithData = (res, status, data) => {
+	res.status(status);
+	res.set("Cache-Control", "no-cache, no-store, must-revalidate;"); // Disable caching
 	res.json(data);
-	setReponse(res, status);
 }

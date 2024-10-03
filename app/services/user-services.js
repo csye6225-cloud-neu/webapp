@@ -6,7 +6,7 @@ export const search = async (email) => {
 }
 
 export const post = async (data) => {
-    const { firstName, lastName, email, password } = data;
+    const { first_name, last_name, email, password } = data;
 
     // Check for duplicate email
     const account = await search(email);
@@ -16,8 +16,8 @@ export const post = async (data) => {
     
     // Create a new account with create(); combines build() and save()
     const accountCreated = await Account.create({
-        firstName,
-        lastName,
+        first_name,
+        last_name,
         email,
         // hashedPassword,
         password,
@@ -30,8 +30,8 @@ export const post = async (data) => {
 export const update = async (id, data) => {
     const account = await Account.findByPk(id);
     if (account) {
-        if (data.firstName) account.firstName = data.firstName;
-        if (data.lastName) account.lastName = data.lastName;
+        if (data.first_name) account.first_name = data.first_name;
+        if (data.last_name) account.last_name = data.last_name;
         if (data.email) account.email = data.email;
         if (data.password) account.password = data.password;
         account.accountUpdated = new Date();
