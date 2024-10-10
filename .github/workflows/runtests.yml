@@ -2,12 +2,14 @@ name: Run tests on PR
 
 on:
     pull_request:
-        branches: [main, a03-01]
+        branches:
+            - main
+            - a03-01
 
 jobs:
     test:
         runs-on: ubuntu-latest
-
+        environment: dev
         services:
             db:
                 image: mysql:8.0
