@@ -3,7 +3,7 @@ name: a03-01
 on:
     pull_request:
         branches:
-            - a03-01
+            - main
 
 jobs:
     test:
