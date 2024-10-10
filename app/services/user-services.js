@@ -19,7 +19,6 @@ export const post = async (data) => {
         first_name,
         last_name,
         email,
-        // hashedPassword,
         password,
         accountCreated: new Date(),
         accountUpdated: new Date()
@@ -45,9 +44,8 @@ export const update = async (id, data) => {
  * Authenticate the user with the token-based authentication
  * @param {Request} req
  * @param {Response} res
- * @param {NextFunction} next
  */
-export const authenticate = async (req, res, next) => {
+export const authenticate = async (req, res) => {
 	const { authorization } = req.headers;
     if (!authorization) {
         res.set("WWW-Authenticate", 'Basic realm="User Visible Realm"');

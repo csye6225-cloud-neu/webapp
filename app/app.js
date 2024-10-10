@@ -12,10 +12,25 @@ const initialize = async (app) => {
 		console.error("Unable to connect to the database:", error);
 	}
 
-	// bootstrap the database
+	app.use(async (req, res, next) => {
+		// Check if the connection is alive by pinging the database
+		sequelize
+			.query("SELECT 1")
+			.then(() => next()) // Continue if the connection is alive
+			.catch((error) => {
+				console.error("Error pinging the database:", error);
+				res.status(503).send();
+			});
+	});
+
+	bootstrapDatabase();
+
+	initializeRoutes(app);
+};
+
+export async function bootstrapDatabase() {
 	try {
-		await sequelize.sync({force: true});
-		console.log("All models were synchronized successfully.");
+		await sequelize.sync({ force: process.env.NODE_ENV !== "production" });
 
 		// Bootstrap the database with some dummy data
 		if ((await sequelize.models.Account.count()) === 0) {
@@ -38,19 +53,6 @@ const initialize = async (app) => {
 	} catch (error) {
 		console.error("Unable to synchronize the database:", error);
 	}
-
-	app.use(async (req, res, next) => {
-		try {
-			// Check if the connection is alive by pinging the database
-			await sequelize.query("SELECT 1");
-			next(); // Continue if the connection is alive
-		} catch (error) {
-			console.error("Error pinging the database:", error);
-			res.status(503).send();
-		}
-	});
-
-	initializeRoutes(app);
-};
+}
 
 export default initialize;
