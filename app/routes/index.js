@@ -1,4 +1,3 @@
-import express from "express";
 import healthzRoute from "./healthz-route.js";
 import userRoute from "./user-route.js";
 

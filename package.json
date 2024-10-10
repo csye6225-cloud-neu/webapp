@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "mocha tests/*.test.js --timeout 5000"
   },
   "type": "module",
   "dependencies": {
@@ -10,5 +11,10 @@
     "express": "^4.21.0",
     "mysql2": "^3.11.3",
     "sequelize": "^6.37.3"
+  },
+  "devDependencies": {
+    "chai": "^5.1.1",
+    "mocha": "^10.7.3",
+    "supertest": "^7.0.0"
   }
 }

@@ -2,15 +2,15 @@ import { setReponse, setReponseWithData } from "./response-handler.js";
 import * as userService from "../services/user-services.js";
 
 export const search = async (req, res) => {
-    if (req.method === "HEAD") return setReponse(res, 405); // Method Not Allowed
+	if (req.method === "HEAD") return setReponse(res, 405); // Method Not Allowed
 	try {
 		const result = await userService.authenticate(req, res);
+		if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
 		const { password, ...resultWithoutPassword } = result.dataValues;
-        if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
 
 		setReponseWithData(res, 200, resultWithoutPassword); // OK
 	} catch (error) {
-        console.log(error)
+		console.log(error);
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -18,25 +18,25 @@ export const search = async (req, res) => {
 export const update = async (req, res) => {
 	try {
 		const res1 = await userService.authenticate(req, res);
-        if (res1 === "Unauthorized") return setReponse(res, 401); // Unauthorized
+		if (res1 === "Unauthorized") return setReponse(res, 401); // Unauthorized
 
 		// check if contains any other fields
-		const allowedFields = ['first_name', 'last_name', 'password']; // Fields allowed to be updated
+		const allowedFields = ["first_name", "last_name", "password"]; // Fields allowed to be updated
 
 		// Extract fields from the request body
 		const updateFields = Object.keys(req.body);
-	  
+
 		// Check if all fields in the request are allowed
-		const isValidUpdate = updateFields.every(field => allowedFields.includes(field));
-	  
+		const isValidUpdate = updateFields.every((field) => allowedFields.includes(field));
+
 		if (!isValidUpdate) return setReponse(res, 400); // Bad Request
-		
-		const result = await userService.update(res1.id, {...req.body});
+
+		const result = await userService.update(res1.id, { ...req.body });
 		const { password, ...resultWithoutPassword } = result.dataValues;
 		if (result === "not found") return setReponse(res, 404); // Not Found
 		setReponseWithData(res, 204, resultWithoutPassword); // No Content
 	} catch (error) {
-        console.log(error)
+		console.log(error);
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -48,6 +48,7 @@ export const post = async (req, res) => {
 		const { password, ...resultWithoutPassword } = result.dataValues;
 		setReponseWithData(res, 201, resultWithoutPassword); // Created
 	} catch (error) {
+		if (error.name === "SequelizeValidationError") return setReponse(res, 400); // Bad Request
 		console.error(error);
 		setReponse(res, 503); // Service Unavailable
 	}
@@ -61,4 +62,3 @@ export const notAllowed = async (req, res) => {
 		setReponse(res, 503); // Service Unavailable
 	}
 };
-

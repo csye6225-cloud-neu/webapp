@@ -12,11 +12,11 @@ export const search = async (req, res) => {
 
 		setReponse(res, 200); // OK
 	} catch (error) {
-		console.error(error);
 		if (error.message === "Bad Request") {
 			setReponse(res, 400); // Bad Request
 			return;
 		}
+		console.error(error);
 		setReponse(res, 503); // Service Unavailable
 	}
 };
