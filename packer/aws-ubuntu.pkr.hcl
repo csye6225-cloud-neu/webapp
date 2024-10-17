@@ -47,6 +47,16 @@ variable "db_password" {
   default = "2404"
 }
 
+variable "github_token" {
+  type    = string
+  default = ""
+}
+
+variable "github_repo" {
+  type    = string
+  default = "webapp"
+}
+
 // build an AMI
 source "amazon-ebs" "ubuntu" {
   ami_name        = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD", timestamp())}"
@@ -84,6 +94,7 @@ build {
   sources = [
     "source.amazon-ebs.ubuntu"
   ]
+
   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive", // disable interactive prompts
@@ -91,8 +102,8 @@ build {
     ]
     inline = [
       "sudo apt-get update",
-      // "sudo apt-get upgrade -y",
-      "sudo apt install -y unzip nodejs npm mysql-server awscli",
+      // "sudo apt upgrade -y",
+      "sudo apt-get install -y unzip nodejs npm mysql-server",
       "sudo apt-get clean",
 
       # Create a new group and user
@@ -100,7 +111,7 @@ build {
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
 
       # download the app artifact and unzip it
-      "aws s3 cp s3://my-bucket/app-artifact/webapp.zip /tmp/webapp.zip",
+      "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/pinkaew-h/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
       "sudo unzip /tmp/webapp.zip -d /opt",
       "sudo rm /tmp/webapp.zip",
       "sudo chown -R csye6225:csye6225 /opt/webapp",
