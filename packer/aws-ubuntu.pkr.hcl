@@ -123,7 +123,8 @@ build {
       "cd /opt/webapp",
       "sudo npm install",
       "sudo ufw allow 3306",
-      "sudo ufw allow 8080"
+      "sudo ufw allow 8080",
+      "sudo npm start"
     ]
   }
 }
