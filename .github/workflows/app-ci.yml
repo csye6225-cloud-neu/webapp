@@ -50,13 +50,13 @@ jobs:
 
             # build on github actions runner
             - name: Create zip artifact
-              run: zip -r webapp.zip . -x 'tests/*'
+              run: zip -r webapp.zip . -x 'tests/**' -x '.github/**'
                 echo "Artifact created"
 
             - name: Upload build artifact
               uses: actions/upload-artifact@v4
               with:
-                name: app-artifact
+                name: webapp
                 path: webapp.zip
 
     build-ami:
@@ -78,7 +78,7 @@ jobs:
             - name: Download application artifact
               uses: actions/download-artifact@v4
               with:
-                name: app-artifact
+                name: webapp
                 path: ./app
 
             - name: Unzip application artifact
@@ -88,19 +88,13 @@ jobs:
             # Build the AMI using Packer
             - name: Build AMI with Packer
               run: |
+                echo "github_repository: ${{github.repository}}"
                 packer init ./packer
-                packer build ./packer
+                packer build ./packer -var 'source_ami=${{secrets.SOURCE_AMI}}' -var 'instance_type=${{secrets.INSTANCE_TYPE}}' -var 'ssh_username=${{secrets.SSH_USERNAME}}' -var 'subnet_id=${{secrets.SUBNET_ID}}' -var 'vpc_id=${{secrets.VPC_ID}}' -var 'db_name=${{secrets.DB_NAME}}' -var 'db_password=${{secrets.DB_PASSWORD}}' -var 'aws_region=${{secrets.AWS_REGION_DEV}}' -var 'github_token=${{secrets.TOKEN_GITHUB}}' -var 'github_repo=${{github.repository}}'
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws_region: ${{ secrets.AWS_REGION_DEV }}
-                instance_type: ${{ secrets.INSTANCE_TYPE }}
-                source_ami: ${{ secrets.SOURCE_AMI }}
-                ssh_username: ${{ secrets.SSH_USERNAME }}
-                subnet_id: ${{ secrets.SUBNET_ID }}
-                vpc_id: ${{ secrets.VPC_ID }}
-                db_name: ${{ secrets.DB_NAME }}
-                db_password: ${{ secrets.DB_PASSWORD }}
+                AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
 
             # Extract the AMI ID from Packer build output (replace with your method to capture it)
             - name: Get AMI ID
