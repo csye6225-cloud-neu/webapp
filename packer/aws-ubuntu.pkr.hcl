@@ -64,15 +64,6 @@ source "amazon-ebs" "ubuntu" {
   region          = "${var.aws_region}"
   instance_type   = "${var.instance_type}"
   source_ami      = "${var.source_ami}"
-  // source_ami_filter {
-  //   filters = {
-  //     virtualization-type = "hvm"
-  //     name                = "ubuntu/images/hvm-ssd/ubuntu-24.04-amd64-server-*"
-  //     root-device-type    = "ebs"
-  //   }
-  //   owners      = ["099720109477"]
-  //   most_recent = true
-  // }
   ssh_username                = "${var.ssh_username}"
   subnet_id                   = "${var.subnet_id}"
   vpc_id                      = "${var.vpc_id}"
@@ -113,7 +104,7 @@ build {
       # download the app artifact and unzip it
       "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
 
-      "sudo unzip webapp.zip -d /opt/webapp",
+      "sudo unzip -o webapp.zip -d /opt/webapp",
       "sudo rm webapp.zip",
       "sudo chown -R csye6225:csye6225 /opt/webapp",
 
