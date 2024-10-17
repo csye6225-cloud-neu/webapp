@@ -111,9 +111,9 @@ build {
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
 
       # download the app artifact and unzip it
-      "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/pinkaew-h/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
-      "sudo unzip /tmp/webapp.zip -d /opt",
-      "sudo rm /tmp/webapp.zip",
+      "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
+      "sudo unzip webapp.zip -d /opt/webapp",
+      "sudo rm webapp.zip",
       "sudo chown -R csye6225:csye6225 /opt/webapp",
 
       # copy the systemd service file and enable it
@@ -121,12 +121,12 @@ build {
       "sudo systemctl daemon-reload",
       "sudo systemctl enable app.service",
 
+      # create the database user
+      "sudo mysql -e \"CREATE DATABASE ${var.db_name};\"",
+
       # set the root password for mysql and start the service
       "sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH 'mysql_native_password' BY '${var.db_password}';\"",
       "sudo systemctl start mysql",
-
-      # create the database user
-      "sudo mysql -e \"CREATE DATABASE ${var.db_name};\"",
 
       "cd /opt/webapp",
       "sudo npm install",
