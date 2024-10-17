@@ -78,7 +78,7 @@ source "amazon-ebs" "ubuntu" {
   vpc_id                      = "${var.vpc_id}"
   associate_public_ip_address = true
 
-  ami_regions = ["us-east-1"]
+  ami_regions = ["${var.aws_region}"]
 
   // storage attached to the vm
   launch_block_device_mappings {

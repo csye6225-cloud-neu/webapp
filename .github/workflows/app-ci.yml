@@ -89,17 +89,18 @@ jobs:
             - name: Build AMI with Packer
               run: |
                 packer init ./packer
-                packer build ./packer/aws-ubuntu.pkr.hcl
-                    -var 'source_ami=${{secrets.SOURCE_AMI}}' 
-                    -var 'instance_type=${{secrets.INSTANCE_TYPE}}' 
-                    -var 'ssh_username=${{secrets.SSH_USERNAME}}' 
-                    -var 'subnet_id=${{secrets.SUBNET_ID}}' 
-                    -var 'vpc_id=${{secrets.VPC_ID}}' 
-                    -var 'db_name=${{secrets.DB_NAME}}' 
-                    -var 'db_password=${{secrets.DB_PASSWORD}}' 
-                    -var 'aws_region=${{secrets.AWS_REGION_DEV}}' 
-                    -var 'github_token=${{secrets.TOKEN_GITHUB}}' 
-                    -var 'github_repo=${{github.repository}}'
+                packer build \
+                  -var 'source_ami=${{ secrets.SOURCE_AMI }}' \
+                  -var 'instance_type=${{ secrets.INSTANCE_TYPE }}' \
+                  -var 'ssh_username=${{ secrets.SSH_USERNAME }}' \
+                  -var 'subnet_id=${{ secrets.SUBNET_ID }}' \
+                  -var 'vpc_id=${{ secrets.VPC_ID }}' \
+                  -var 'db_name=${{ secrets.DB_NAME }}' \
+                  -var 'db_password=${{ secrets.DB_PASSWORD }}' \
+                  -var 'aws_region=${{ secrets.AWS_REGION_DEV }}' \
+                  -var 'github_token=${{ secrets.TOKEN_GITHUB }}' \
+                  -var 'github_repo=${{ github.repository }}' \
+                  ./packer/aws-ubuntu.pkr.hcl
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
