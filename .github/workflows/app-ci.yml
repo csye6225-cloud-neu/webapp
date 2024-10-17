@@ -100,6 +100,10 @@ jobs:
                   -var 'aws_region=${{ secrets.AWS_REGION_DEV }}' \
                   -var 'github_token=${{ secrets.TOKEN_GITHUB }}' \
                   -var 'github_repo=${{ github.repository }}' \
+                  -var 'db_dialect=${{ secrets.DB_DIALECT }}' \
+                  -var 'db_host=${{ secrets.DB_HOST }}' \
+                  -var 'db_username=${{ secrets.DB_USERNAME }}' \
+                  -var 'port=${{ secrets.PORT }}' \
                   ./packer/aws-ubuntu.pkr.hcl
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
