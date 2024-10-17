@@ -112,17 +112,13 @@ jobs:
               run: |
                 AMI_ID=$(packer build -machine-readable ./packer/aws-ubuntu.pkr.hcl | grep 'artifact,0,id' | cut -d, -f6 | cut -d: -f2)
                 echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
-
-            # # Install AWS CLI
-            # - name: Install AWS CLI
-            #   run: sudo apt-get install -y awscli
-
-            # Share the AMI with the DEMO AWS account
+            
+            # Share the AMI with the DEMO account
             - name: Share AMI with DEMO account
               run: |
                 aws ec2 modify-image-attribute \
                   --image-id ${{ env.AMI_ID }} \
-                  --launch-permission "Add=[{UserId=${{ secrets.DEMO_ACCOUNT_ID }}]"
+                  --launch-permission "Add=[{UserId=${{ secrets.DEMO_ACCOUNT_ID }} }]"
               env:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
