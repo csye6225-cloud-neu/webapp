@@ -54,7 +54,7 @@ variable "github_token" {
 
 variable "github_repo" {
   type    = string
-  default = "webapp"
+  default = "csye6225-cloud-neu/webapp"
 }
 
 // build an AMI
@@ -112,6 +112,7 @@ build {
 
       # download the app artifact and unzip it
       "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
+
       "sudo unzip webapp.zip -d /opt/webapp",
       "sudo rm webapp.zip",
       "sudo chown -R csye6225:csye6225 /opt/webapp",
