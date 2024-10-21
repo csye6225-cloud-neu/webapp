@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - a-41
     types:
       - closed
 
