@@ -57,13 +57,33 @@ variable "github_repo" {
   default = "csye6225-cloud-neu/webapp"
 }
 
+variable "db_username" {
+  type    = string
+  default = "root"
+}
+
+variable "db_host" {
+  type    = string
+  default = "localhost"
+}
+
+variable "port" {
+  type    = string
+  default = "8080"
+}
+
+variable "db_dialect" {
+  type    = string
+  default = "mysql"
+}
+
 // build an AMI
 source "amazon-ebs" "ubuntu" {
-  ami_name        = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD", timestamp())}"
-  ami_description = "CSYE6225 Ubuntu AMI"
-  region          = "${var.aws_region}"
-  instance_type   = "${var.instance_type}"
-  source_ami      = "${var.source_ami}"
+  ami_name                    = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD", timestamp())}"
+  ami_description             = "CSYE6225 Ubuntu AMI"
+  region                      = "${var.aws_region}"
+  instance_type               = "${var.instance_type}"
+  source_ami                  = "${var.source_ami}"
   ssh_username                = "${var.ssh_username}"
   subnet_id                   = "${var.subnet_id}"
   vpc_id                      = "${var.vpc_id}"
@@ -103,7 +123,7 @@ build {
 
       # download the app artifact and unzip it
       "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
-      
+
       "sudo unzip webapp.zip -d /opt/webapp",
       "cd /opt/webapp && sudo unzip webapp.zip",
       "sudo chown -R csye6225:csye6225 /opt/webapp",
@@ -124,6 +144,15 @@ build {
       "sudo npm install",
       "sudo ufw allow 3306",
       "sudo ufw allow 8080",
+
+      "export $(grep -v '^#' /path/to/.env | xargs -d '\n')",
+      "sudo echo 'export DB_NAME=${var.db_name}' >> /home/ubuntu/.bashrc",
+      "sudo echo 'export DB_HOST=${var.db_host}' >> /home/ubuntu/.bashrc",
+      "sudo echo 'export DB_USERNAME=${var.db_username}' >> /home/ubuntu/.bashrc",
+      "sudo echo 'export DB_PASSWORD=${var.db_password}' >> /home/ubuntu/.bashrc",
+      "sudo echo 'export PORT=${var.port}' >> /home/ubuntu/.bashrc",
+      "sudo echo 'export DB_DIALECT=${var.db_dialect}' >> /home/ubuntu/.bashrc",
+
       "sudo npm start"
     ]
   }
