@@ -47,6 +47,11 @@ variable "github_repo" {
   default = "csye6225-cloud-neu/webapp"
 }
 
+variable "demo_account_id" {
+  type    = string
+  default = "051826718120"
+}
+
 // build an AMI
 source "amazon-ebs" "ubuntu" {
   ami_name                    = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD", timestamp())}"
@@ -57,6 +62,7 @@ source "amazon-ebs" "ubuntu" {
   ssh_username                = "${var.ssh_username}"
   subnet_id                   = "${var.subnet_id}"
   vpc_id                      = "${var.vpc_id}"
+  ami_users                   = ["${var.demo_account_id}"]
   associate_public_ip_address = true
 
   ami_regions = ["${var.aws_region}"]
