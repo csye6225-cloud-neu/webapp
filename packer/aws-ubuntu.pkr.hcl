@@ -57,6 +57,7 @@ source "amazon-ebs" "ubuntu" {
   ssh_username                = "${var.ssh_username}"
   subnet_id                   = "${var.subnet_id}"
   vpc_id                      = "${var.vpc_id}"
+  ami_users                   = ["${var.demo_account_id}"]
   associate_public_ip_address = true
 
   ami_regions = ["${var.aws_region}"]
