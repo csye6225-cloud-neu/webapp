@@ -30,7 +30,7 @@ const initialize = async (app) => {
 
 export async function bootstrapDatabase() {
 	try {
-		await sequelize.sync({ force: process.env.NODE_ENV !== "production" });
+		await sequelize.sync({ force: true });
 
 		// Bootstrap the database with some dummy data
 		if ((await sequelize.models.Account.count()) === 0) {

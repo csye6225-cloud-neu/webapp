@@ -128,3 +128,15 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Cache objects
+packer_cache/
+
+# Crash log
+crash.log
+
+# https://www.packer.io/guides/hcl/variables
+*.pkrvars.hcl
+
+# For built boxes
+*.box
