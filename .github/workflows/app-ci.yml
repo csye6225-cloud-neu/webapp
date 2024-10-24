@@ -98,32 +98,3 @@ jobs:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
-
-            # Extract the AMI ID from Packer build output (replace with your method to capture it)
-            - name: Get AMI ID
-              id: ami
-              run: |
-                AMI_ID=$(packer build -machine-readable ./packer/aws-ubuntu.pkr.hcl | grep 'artifact,0,id' | cut -d, -f6 | cut -d: -f2)
-                echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
-            
-            # Share the AMI with the DEMO account
-            - name: Share AMI with DEMO account
-              run: |
-                aws ec2 modify-image-attribute \
-                  --image-id ${{ env.AMI_ID }} \
-                  --launch-permission "Add=[{UserId=${{ secrets.DEMO_ACCOUNT_ID }} }]"
-              env:
-                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
-
-            # Make the AMI private
-            - name: Make AMI Private
-              run: |
-                aws ec2 modify-image-attribute \
-                  --image-id ${{ env.AMI_ID }} \
-                  --launch-permission "Remove=[{Group=all}]"
-              env:
-                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
