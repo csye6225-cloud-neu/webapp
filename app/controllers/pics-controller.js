@@ -1,0 +1,61 @@
+import { setReponse, setReponseWithData } from "./response-handler.js";
+import { authenticate } from "../services/user-services.js";
+import * as picsService from "../services/pics-services.js";
+
+export const postPic = async (req, res) => {
+	try {
+        // Authenticate the user
+		const result = await authenticate(req, res);
+		if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
+
+		// Check if the image is present
+        const image = req.file;
+		if (!image) return setReponse(res, 400); // Bad Request
+
+        // Post the pic
+		const result1 = await picsService.postPic(result.id, image);
+		if (result1 === "duplicate") return setReponse(res, 400); // Bad Request
+		
+		const { password, ...resultWithoutPassword } = result1.dataValues;
+		setReponseWithData(res, 201, resultWithoutPassword); // Created
+	} catch (error) {
+		console.error(error);
+		setReponse(res, 503); // Service Unavailable
+	}
+};
+
+export const getPic = async (req, res) => {
+	if (req.method === "HEAD") return setReponse(res, 405); // Method Not Allowed
+	try {
+        // Authenticate the user
+		const result = await authenticate(req, res);
+		if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
+
+        // Get the pic
+		const result1 = await picsService.getPic(result.id);
+		if (result1 === "not found") return setReponse(res, 404); // Not Found
+
+		const { password, ...resultWithoutPassword } = result1.dataValues;
+		setReponseWithData(res, 200, resultWithoutPassword); // OK
+	} catch (error) {
+		console.error(error);
+		setReponse(res, 503); // Service Unavailable
+	}
+}
+
+export const deletePic = async (req, res) => {
+	try {
+        // Authenticate the user
+		const result = await authenticate(req, res);
+		if (result === "Unauthorized") return setReponse(res, 401); // Unauthorized
+
+        // Delete the pic
+		const result1 = await picsService.deletePic(result.id);
+		if (result1 === "not found") return setReponse(res, 404); // Not Found
+
+		setReponse(res, 204); // No Content
+	} catch (error) {
+		console.error(error);
+		setReponse(res, 503); // Service Unavailable
+	}
+}
