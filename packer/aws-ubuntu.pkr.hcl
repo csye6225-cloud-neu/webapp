@@ -96,7 +96,11 @@ build {
       "sudo apt-get install -y unzip nodejs npm mysql-client",
       "sudo apt-get clean",
 
-      # Create a new group and user
+      # install and start the CloudWatch agent
+      "wget https://amazoncloudwatch-agent-us-east-1.s3.us-east-1.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb",
+      "sudo dpkg -i -E ./amazon-cloudwatch-agent.deb",
+
+      # create a new group and user
       "sudo groupadd csye6225",
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
 
