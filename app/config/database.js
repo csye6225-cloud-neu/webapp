@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import { Sequelize } from "sequelize";
-import { cloudwatch } from "./aws.js";
-import { PutMetricDataCommand } from "@aws-sdk/client-cloudwatch";
+import statsd from "./statsd.js";
 
 // Load environment variables
 dotenv.config();
@@ -13,32 +12,13 @@ export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERN
 	dialect: process.env.DB_DIALECT,
 });
 
-// Measure the duration of each query and send to CloudWatch
+// Measure the duration of each query
 sequelize.addHook("beforeQuery", (options) => {
 	options.startTime = Date.now();
 });
 
 sequelize.addHook("afterQuery", async (options) => {
 	const duration = Date.now() - options.startTime;
-	const command = new PutMetricDataCommand(
-		{
-			MetricData: [
-				{
-					MetricName: "DatabaseQuery_Duration",
-					Dimensions: [{ Name: "Query", Value: options.type }],
-					Unit: "Milliseconds",
-					Value: duration,
-				},
-			],
-			Namespace: "WebAppMetrics",
-		},
-		(err, data) => {
-			if (err) console.error(err);
-		}
-	);
-	try {
-		await cloudwatch.send(command);
-	} catch (error) {
-		console.error("Error sending metrics to CloudWatch:", error);
-	}
+	statsd.timing("db.query.time", duration);
+	statsd.increment("db.query.count");
 });

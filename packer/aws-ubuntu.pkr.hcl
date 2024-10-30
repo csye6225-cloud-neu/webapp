@@ -119,6 +119,9 @@ build {
       "sudo cp /opt/webapp/packer/systemd/app.service /etc/systemd/system/",
       "sudo systemctl daemon-reload",
       "sudo systemctl enable app.service",
+
+      # move the CloudWatch agent configuration file
+      "sudo mv ./app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
     ]
   }
 }

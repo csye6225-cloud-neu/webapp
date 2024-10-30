@@ -1,6 +1,7 @@
 import Image from "../models/image-model.js";
 import { PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { s3Client } from "../config/aws.js";
+import statsd from "../config/statsd.js";
 
 export const postPic = async (id, file) => {
 	const fileName = `${id}/${file.originalname}`;
@@ -18,7 +19,12 @@ export const postPic = async (id, file) => {
 	// Upload the file to S3
 	try {
 		// Put an object into an Amazon S3 bucket.
-		const data = await s3Client.send(new PutObjectCommand(params));
+        const startTime = Date.now();
+		await s3Client.send(new PutObjectCommand(params));
+        const duration = Date.now() - startTime;
+        statsd.timing("s3.post.time", duration);
+        statsd.increment("s3.post.count");
+
 		// Create a record in the database
 		const imageCreated = Image.create({
 			file_name: file.originalname,
@@ -46,12 +52,16 @@ export const deletePic = async (id) => {
 	if (image) {
 		// Delete the file from S3
 		try {
-			const result = await s3Client.send(
+            const startTime = Date.now();
+			await s3Client.send(
 				new DeleteObjectCommand({
 					Bucket: process.env.S3_BUCKET_NAME,
 					Key: image.url,
 				})
 			);
+            const duration = Date.now() - startTime;
+            statsd.timing("s3.delete.time", duration);
+            statsd.increment("s3.delete.count");
 		} catch (error) {
 			console.error("Error deleting file:", error);
 			return "bad request";
