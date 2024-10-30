@@ -1,8 +1,7 @@
 import express from "express";
 import initializeRoutes from "./routes/index.js";
 import { sequelize } from "./config/database.js";
-import { cloudwatch } from "./config/aws.js";
-import { PutMetricDataCommand } from "@aws-sdk/client-cloudwatch";
+import statsd from "./config/statsd.js";
 
 const initialize = async (app) => {
 	app.use(express.json()); // Parse incoming JSON payloads
@@ -64,34 +63,8 @@ async function trackAPICalls(app) {
 
 		res.on("finish", async () => {
 			const duration = Date.now() - startTime;
-
-			const command = new PutMetricDataCommand(
-				{
-					MetricData: [
-						{
-							MetricName: `${req.method}_${req.path}_Count`,
-							Dimensions: [{ Name: "APIName", Value: req.path }],
-							Unit: "Count",
-							Value: 1,
-						},
-						{
-							MetricName: `${req.method}_${req.path}_Duration`,
-							Dimensions: [{ Name: "APIName", Value: req.path }],
-							Unit: "Milliseconds",
-							Value: duration,
-						},
-					],
-					Namespace: "WebAppMetrics",
-				},
-				(err, data) => {
-					if (err) console.error(err);
-				}
-			);
-			try {
-				await cloudwatch.send(command);
-			} catch (error) {
-				console.error("Error sending metrics to CloudWatch:", error);
-			}
+			statsd.timing("api.call_time", duration);
+			statsd.increment("api.call_count");
 		});
 
 		next();
