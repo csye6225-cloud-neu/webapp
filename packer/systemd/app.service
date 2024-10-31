@@ -10,8 +10,8 @@ WorkingDirectory=/opt/webapp
 ExecStart=/usr/bin/node /opt/webapp/server.js
 Restart=always
 RestartSec=3
-StandardOutput=journal
-StandardError=journal
+StandardOutput=append:/var/log/csye6225.log
+StandardError=append:/var/log/csye6225.log
 SyslogIdentifier=CSYE6225
 Environment=NODE_ENV=production
 
