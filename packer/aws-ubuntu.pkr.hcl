@@ -110,8 +110,14 @@ build {
       "sudo unzip webapp.zip -d /opt/webapp",
       "cd /opt/webapp && sudo unzip webapp.zip",
       "sudo rm -f /opt/webapp/webapp.zip",
+      
       # move the CloudWatch agent configuration file
       "sudo mv ./app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
+
+      # Create log file
+      "sudo touch /var/log/csye6225.log",
+      "sudo chmod 644 /var/log/csye6225.log",
+      "sudo chown csye6225:csye6225 /var/log/csye6225.log",
 
       "sudo chown -R csye6225:csye6225 /opt/webapp",
       "cd /opt/webapp",
