@@ -63,6 +63,7 @@ async function trackAPICalls(app) {
 
 		res.on("finish", async () => {
 			const duration = Date.now() - startTime;
+			console.log("API duration:", duration);
 			statsd.timing("api.call_time", duration);
 			statsd.increment("api.call_count");
 		});
