@@ -1,8 +1,7 @@
 {
     "agent": {
         "metrics_collection_interval": 10,
-        "logfile": "/var/log/amazon-cloudwatch-agent.log",
-        "run_as_user": "csye6225"
+        "logfile": "/var/log/amazon-cloudwatch-agent.log"
     },
     "logs": {
         "logs_collected": {
