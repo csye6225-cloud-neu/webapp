@@ -58,18 +58,17 @@ export async function bootstrapDatabase() {
 }
 
 async function trackAPICalls(app) {
-	app.use((req, res, next) => {
-		const startTime = Date.now();
+    app.use((req, res, next) => {
+        const startTime = Date.now();
 
-		res.on("finish", async () => {
-			const duration = Date.now() - startTime;
-			console.log("API duration:", duration);
-			statsd.timing("api.call_time", duration);
-			statsd.increment("api.call_count");
-		});
+        res.on("finish", () => {
+            const duration = Date.now() - startTime;
+            statsd.timing("api.call_time", duration);
+            statsd.increment("api.call_count");
+        });
 
-		next();
-	});
+        next();
+    });
 }
 
 export default initialize;

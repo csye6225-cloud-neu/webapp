@@ -13,11 +13,11 @@ export const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USERN
 });
 
 // Measure the duration of each query
-sequelize.addHook("beforeExecute", (options) => {
+sequelize.addHook("beforeQuery", (options) => {
 	options.startTime = Date.now();
 });
 
-sequelize.addHook("afterExecute", async (options) => {
+sequelize.addHook("afterQuery", async (options) => {
 	const duration = Date.now() - options.startTime;
 	statsd.timing("db.query.time", duration);
 	statsd.increment("db.query.count");
