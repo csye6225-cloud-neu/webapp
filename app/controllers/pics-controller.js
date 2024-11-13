@@ -19,6 +19,7 @@ export const postPic = async (req, res) => {
 		setReponseWithData(res, 201, result1.dataValues); // Created
 	} catch (error) {
 		console.error(error);
+		if (error.message.includes("Forbidden")) return setReponseWithData(res, 403, "Please verify your account."); // Forbidden
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -37,6 +38,7 @@ export const getPic = async (req, res) => {
 		setReponseWithData(res, 200, result1.dataValues); // OK
 	} catch (error) {
 		console.error(error);
+		if (error.message.includes("Forbidden")) return setReponseWithData(res, 403, "Please verify your account."); // Forbidden
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -54,6 +56,7 @@ export const deletePic = async (req, res) => {
 		setReponse(res, 204); // No Content
 	} catch (error) {
 		console.error(error);
+		if (error.message.includes("Forbidden")) return setReponseWithData(res, 403, "Please verify your account."); // Forbidden
 		setReponse(res, 503); // Service Unavailable
 	}
 };

@@ -11,6 +11,7 @@ export const search = async (req, res) => {
 		setReponseWithData(res, 200, resultWithoutPassword); // OK
 	} catch (error) {
 		console.log(error);
+		if (error.message.includes("Forbidden")) return setReponseWithData(res, 403, "Please verify your account."); // Forbidden
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -37,6 +38,7 @@ export const update = async (req, res) => {
 		setReponseWithData(res, 204, resultWithoutPassword); // No Content
 	} catch (error) {
 		console.log(error);
+		if (error.message.includes("Forbidden")) return setReponseWithData(res, 403, "Please verify your account."); // Forbidden
 		setReponse(res, 503); // Service Unavailable
 	}
 };
@@ -44,11 +46,17 @@ export const update = async (req, res) => {
 export const post = async (req, res) => {
 	try {
 		const result = await userService.post(req.body);
+
+		// if the user already exists in the database and is verified
 		if (result === "duplicate") return setReponse(res, 400); // Bad Request
+
+		// if the user does not exist in the database or is not verified
+		await userService.publishVerificationMessage(result);
+
 		const { password, ...resultWithoutPassword } = result.dataValues;
 		setReponseWithData(res, 201, resultWithoutPassword); // Created
 	} catch (error) {
-		if (error.name === "SequelizeValidationError") return setReponse(res, 400); // Bad Request
+		if (error.message === "SequelizeValidationError") return setReponse(res, 400); // Bad Request
 		console.error(error);
 		setReponse(res, 503); // Service Unavailable
 	}
