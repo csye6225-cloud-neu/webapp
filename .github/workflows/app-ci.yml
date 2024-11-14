@@ -3,7 +3,7 @@ name: App CI Pipeline
 on: 
   push:
     branches:
-      - main
+      - a08-01
 
 jobs:
     integration-test:
@@ -64,7 +64,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Configure AWS Credentials
-              uses: aws-actions/configure-aws-credentials@v1
+              uses: aws-actions/configure-aws-credentials@v4
               with:
                 aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -98,3 +98,53 @@ jobs:
                 AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
                 AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
                 AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
+
+            - name: Get Latest AMI ID
+              id: ami
+              run: |
+                AMI_ID=$(aws ec2 describe-images --filters "Name=name,Values=my-latest-ami" --query "Images[0].ImageId" --output text)
+                echo "AMI_ID=${AMI_ID}" >> $GITHUB_ENV
+      
+            - name: Create new Launch Template Version
+              id: create_lt_version
+              run: |
+                aws ec2 create-launch-template-version \
+                  --launch-template-name ${{ secrets.LAUNCH_TEMPLATE_NAME }} \
+                  --version-description "New Launch Template version with latest AMI" \
+                  --source-version 1 \
+                  --launch-template-data "{\"ImageId\":\"${AMI_ID}\"}" \
+                NEW_LT_VERSION=$(aws ec2 describe-launch-template-versions --launch-template-name ${{ secrets.LAUNCH_TEMPLATE_NAME }} --query "LaunchTemplateVersions[-1].VersionNumber" --output text)
+                echo "NEW_LT_VERSION=${NEW_LT_VERSION}" >> $GITHUB_ENV
+      
+            - name: Update Auto Scaling Group with New Launch Template Version
+              run: |
+                aws autoscaling update-auto-scaling-group \
+                  --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                  --launch-template "LaunchTemplateName=${{ secrets.LAUNCH_TEMPLATE_NAME }},Version=${NEW_LT_VERSION}"
+      
+            - name: Initiate Instance Refresh
+              id: refresh
+              run: |
+                REFRESH_ID=$(aws autoscaling start-instance-refresh \
+                  --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                  --preferences '{"InstanceWarmup": 300, "MinHealthyPercentage": 50}' \
+                  --query "InstanceRefreshId" --output text)
+                echo "REFRESH_ID=${REFRESH_ID}" >> $GITHUB_ENV
+      
+            - name: Wait for Instance Refresh to Complete
+              run: |
+                STATUS="InProgress"
+                until [ "$STATUS" != "InProgress" ]; do
+                  sleep 30
+                  STATUS=$(aws autoscaling describe-instance-refreshes \
+                    --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                    --query "InstanceRefreshes[?InstanceRefreshId=='${REFRESH_ID}'].Status" \
+                    --output text)
+                  echo "Current Status: $STATUS"
+                done
+                if [ "$STATUS" == "Successful" ]; then
+                  echo "Instance refresh completed successfully."
+                else
+                  echo "Instance refresh failed."
+                  exit 1
+                fi

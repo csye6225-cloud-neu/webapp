@@ -85,17 +85,13 @@ export const publishVerificationMessage = async (account) => {
 	const verificationToken = await bcrypt.hash(`${id}${email}`, 10);
 
 	// Save the verification token in the database for new users
-	await Verification.upsert({ user_id: id, email, token: verificationToken });
+	// await Verification.upsert({ user_id: id, email, token: verificationToken });
 
 	// Publish the verification message to the SNS topic
 	const message = {
 		Message: JSON.stringify({ id, email, token: verificationToken, timestamp: new Date().toISOString() }),
 		TopicArn: process.env.SNS_TOPIC_ARN,
 	};
-    const expiry = new Date().setMinutes(new Date().getMinutes() + 5);
-    console.log(expiry)
 
-    Verification.update({ expiry }, { where: { user_id: id } });
-    console.log(message);
 	return await snsClient.send(new PublishCommand(message));
 };
