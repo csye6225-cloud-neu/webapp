@@ -1,5 +1,4 @@
-import Verification from '../models/verification-model.js';
-import Account from '../models/account-model.js';
+import { Account, Verification } from '../models/index.js';
 
 export const findUserByToken = async (token) => {
     // join the Verification and Account tables

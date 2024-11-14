@@ -51,6 +51,7 @@ export const post = async (req, res) => {
 		if (result === "duplicate") return setReponse(res, 400); // Bad Request
 
 		// if the user does not exist in the database or is not verified
+		if (process.env.NODE_ENV === "test") return setReponseWithData(res, 201, result); // Created
 		await userService.publishVerificationMessage(result);
 
 		const { password, ...resultWithoutPassword } = result.dataValues;

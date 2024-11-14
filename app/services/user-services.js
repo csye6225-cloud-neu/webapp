@@ -2,7 +2,6 @@ import Account from "../models/account-model.js";
 import bcrypt from "bcrypt";
 import { PublishCommand } from "@aws-sdk/client-sns";
 import { snsClient } from "../config/aws.js";
-import Verification from "../models/verification-model.js";
 
 export const search = async (email) => {
 	return await Account.findOne({ where: { email } });

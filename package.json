@@ -1,7 +1,7 @@
 {
   "scripts": {
     "start": "node server.js",
-    "test": "mocha tests/*.test.js --timeout 5000"
+    "test": "NODE_ENV=test mocha tests/*.test.js --timeout 5000"
   },
   "type": "module",
   "dependencies": {
