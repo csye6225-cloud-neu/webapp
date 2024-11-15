@@ -58,7 +58,8 @@ jobs:
     build-ami:
       runs-on: ubuntu-latest
       needs: build-artifact
-  
+      environment: ${{ vars.ENVIRONMENT }}
+
       steps:
             - name: Check out repository code
               uses: actions/checkout@v4
@@ -85,8 +86,8 @@ jobs:
               run: |
                 packer init ./packer
                 packer build \
-                  -var 'source_ami=${{ secrets.SOURCE_AMI }}' \
-                  -var 'instance_type=${{ secrets.INSTANCE_TYPE }}' \
+                  -var 'source_ami=${{ vars.SOURCE_AMI }}' \
+                  -var 'instance_type=${{ vars.INSTANCE_TYPE }}' \
                   -var 'ssh_username=${{ secrets.SSH_USERNAME }}' \
                   -var 'subnet_id=${{ secrets.SUBNET_ID }}' \
                   -var 'vpc_id=${{ secrets.VPC_ID }}' \
