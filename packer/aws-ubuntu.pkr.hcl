@@ -110,7 +110,7 @@ build {
       "sudo unzip webapp.zip -d /opt/webapp",
       "cd /opt/webapp && sudo unzip webapp.zip",
       "sudo rm -f /opt/webapp/webapp.zip",
-      
+
       # move the CloudWatch agent configuration file
       "sudo mv ./app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
 

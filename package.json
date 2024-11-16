@@ -1,11 +1,12 @@
 {
   "scripts": {
     "start": "node server.js",
-    "test": "mocha tests/*.test.js --timeout 5000"
+    "test": "NODE_ENV=test mocha tests/*.test.js --timeout 5000"
   },
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.682.0",
+    "@aws-sdk/client-sns": "^3.687.0",
     "@sendgrid/mail": "^8.1.4",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
