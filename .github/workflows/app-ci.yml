@@ -20,6 +20,12 @@ jobs:
               options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
         steps:
+            - name: Check Repository Owner
+              run: |
+                if [ "${{ github.repository_owner }}" != "csye6225-cloud-neu" ]; then
+                  echo "This workflow runs only in the organization repository."
+                  exit 0
+                fi
             - name: Check out repository code
               uses: actions/checkout@v4
 
@@ -103,8 +109,16 @@ jobs:
     instance-refresh:
       runs-on: ubuntu-latest
       needs: build-ami
+      environment: ${{ vars.ENVIRONMENT }}
 
       steps:
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region: ${{ secrets.AWS_REGION_DEV }}
+      
             - name: Get Latest AMI ID
               id: ami
               run: |
