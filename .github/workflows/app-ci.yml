@@ -3,7 +3,7 @@ name: App CI Pipeline
 on: 
   push:
     branches:
-      - a08-01
+      - main
 
 jobs:
     integration-test:
