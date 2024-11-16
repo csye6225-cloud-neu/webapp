@@ -3,7 +3,7 @@ name: App CI Pipeline
 on: 
   push:
     branches:
-      - a08-03
+      - main
 
 jobs:
     integration-test:
@@ -20,6 +20,12 @@ jobs:
               options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
         steps:
+            - name: Check Repository Owner
+              run: |
+                if [ "${{ github.repository_owner }}" != "csye6225-cloud-neu" ]; then
+                  echo "This workflow runs only in the organization repository."
+                  exit 0
+                fi
             - name: Check out repository code
               uses: actions/checkout@v4
 
