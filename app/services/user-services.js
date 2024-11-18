@@ -1,4 +1,4 @@
-import Account from "../models/account-model.js";
+import { Account, Verification } from "../models/index.js";
 import bcrypt from "bcrypt";
 import { PublishCommand } from "@aws-sdk/client-sns";
 import { snsClient } from "../config/aws.js";
@@ -82,9 +82,10 @@ export const authenticate = async (req, res) => {
 export const publishVerificationMessage = async (account) => {
 	const { id, email } = account;
 	const verificationToken = await bcrypt.hash(`${id}${email}`, 10);
+	const expiry = new Date().setMinutes(new Date().getMinutes() + 2);
 
 	// Save the verification token in the database for new users
-	// await Verification.upsert({ user_id: id, email, token: verificationToken });
+	await Verification.upsert({ user_id: id, email, token: verificationToken, expiry });
 
 	// Publish the verification message to the SNS topic
 	const message = {
