@@ -1,4 +1,4 @@
-name: App CI Pipeline
+name: App CI/CD
 
 on:
     push:
@@ -99,9 +99,39 @@ jobs:
                     --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
                     --launch-template "LaunchTemplateName=${{ secrets.LAUNCH_TEMPLATE_NAME }},Version=${NEW_LT_VERSION}"
 
-            - name: Initiate Instance Refresh
-              id: refresh
+                    - name: Initiate Instance Refresh
+                    id: refresh
+                    run: |
+                      REFRESH_ID=$(aws autoscaling start-instance-refresh \
+                        --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                        --query "InstanceRefreshId" --output text)
+                      echo "REFRESH_ID=${REFRESH_ID}" >> $GITHUB_ENV
+
+            - name: Wait for Instance Refresh to Complete
               run: |
-                  aws autoscaling start-instance-refresh \
-                    --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-                    --query "InstanceRefreshId" --output text
+                  TIMEOUT=600
+                  ELAPSED=0
+                  STATUS="InProgress"
+                  while [ "$STATUS" == "InProgress" ]; do
+                    sleep 30
+                    ELAPSED=$((ELAPSED + 30))
+                    if [ $ELAPSED -ge $TIMEOUT ]; then
+                      echo "Instance refresh timed out after $ELAPSED seconds.."
+                      exit 1
+                    fi
+                    STATUS=$(aws autoscaling describe-instance-refreshes \
+                      --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                      --query "InstanceRefreshes[?InstanceRefreshId=='${REFRESH_ID}'].Status" \
+                      --output text)
+                    if [ -z "$STATUS" ]; then
+                      echo "Failed to fetch instance refresh status. Exiting."
+                      exit 1
+                    fi
+                    echo "Current Status: $STATUS"
+                  done
+                  if [ "$STATUS" == "Successful" ]; then
+                    echo "Instance refresh completed successfully."
+                  else
+                    echo "Instance refresh failed with status: $STATUS."
+                    exit 1
+                  fi
