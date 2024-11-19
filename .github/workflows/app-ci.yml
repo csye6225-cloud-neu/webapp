@@ -99,13 +99,13 @@ jobs:
                     --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
                     --launch-template "LaunchTemplateName=${{ secrets.LAUNCH_TEMPLATE_NAME }},Version=${NEW_LT_VERSION}"
 
-                    - name: Initiate Instance Refresh
-                    id: refresh
-                    run: |
-                      REFRESH_ID=$(aws autoscaling start-instance-refresh \
-                        --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-                        --query "InstanceRefreshId" --output text)
-                      echo "REFRESH_ID=${REFRESH_ID}" >> $GITHUB_ENV
+            - name: Initiate Instance Refresh
+              id: refresh
+              run: |
+                  REFRESH_ID=$(aws autoscaling start-instance-refresh \
+                    --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
+                    --query "InstanceRefreshId" --output text)
+                  echo "REFRESH_ID=${REFRESH_ID}" >> $GITHUB_ENV
 
             - name: Wait for Instance Refresh to Complete
               run: |
