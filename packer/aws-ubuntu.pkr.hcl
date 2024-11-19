@@ -29,22 +29,12 @@ variable "subnet_id" {
 
 variable "instance_type" {
   type    = string
-  default = "t2.small"
+  default = "t2.micro"
 }
 
 variable "vpc_id" {
   type    = string
   default = "vpc-0eafab646c53a7c84"
-}
-
-variable "github_token" {
-  type    = string
-  default = ""
-}
-
-variable "github_repo" {
-  type    = string
-  default = "csye6225-cloud-neu/webapp"
 }
 
 variable "demo_account_id" {
@@ -54,7 +44,7 @@ variable "demo_account_id" {
 
 // build an AMI
 source "amazon-ebs" "ubuntu" {
-  ami_name                    = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD", timestamp())}"
+  ami_name                    = "csye6225-ubuntu-ami_${formatdate("YYYY-MM-DD HH.mmaa", timestamp())}"
   ami_description             = "CSYE6225 Ubuntu AMI"
   region                      = "${var.aws_region}"
   instance_type               = "${var.instance_type}"
@@ -63,9 +53,8 @@ source "amazon-ebs" "ubuntu" {
   subnet_id                   = "${var.subnet_id}"
   vpc_id                      = "${var.vpc_id}"
   ami_users                   = ["${var.demo_account_id}"]
+  ami_regions                 = ["${var.aws_region}"]
   associate_public_ip_address = true
-
-  ami_regions = ["${var.aws_region}"]
 
   tags = {
     Name = "csye6225-ubuntu-ami"
@@ -86,6 +75,11 @@ build {
     "source.amazon-ebs.ubuntu"
   ]
 
+  provisioner "file" {
+    source      = "./webapp.zip"
+    destination = "./webapp.zip"
+  }
+
   provisioner "shell" {
     environment_vars = [
       "DEBIAN_FRONTEND=noninteractive", // disable interactive prompts
@@ -104,18 +98,14 @@ build {
       "sudo groupadd csye6225",
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
 
-      # download the app artifact and unzip it
-      "curl -H \"Authorization: token ${var.github_token}\" -L \"https://api.github.com/repos/${var.github_repo}/actions/artifacts\" | jq -r '.artifacts[0].archive_download_url' | xargs -n 1 curl -H \"Authorization: token ${var.github_token}\" -L -o webapp.zip",
-
       "sudo unzip webapp.zip -d /opt/webapp",
       "cd /opt/webapp && sudo unzip webapp.zip",
-      "sudo rm -f /opt/webapp/webapp.zip",
+      "sudo rm -f webapp.zip",
 
       # move the CloudWatch agent configuration file
-      "sudo mv ./app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
+      "sudo mv /opt/webapp/app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
 
       "sudo chown -R csye6225:csye6225 /opt/webapp",
-      "cd /opt/webapp",
       "sudo npm install",
 
       # copy the systemd service file and enable it

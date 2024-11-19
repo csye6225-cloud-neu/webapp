@@ -20,12 +20,6 @@ jobs:
               options: --health-cmd="mysqladmin ping --silent" --health-interval=10s --health-timeout=5s --health-retries=3
 
         steps:
-            - name: Check Repository Owner
-              run: |
-                if [ "${{ github.repository_owner }}" != "csye6225-cloud-neu" ]; then
-                  echo "This workflow runs only in the organization repository."
-                  exit 0
-                fi
             - name: Check out repository code
               uses: actions/checkout@v4
 
@@ -52,7 +46,7 @@ jobs:
 
             # build on github actions runner
             - name: Create zip artifact
-              run: zip -r webapp.zip . -x 'tests/**' -x '.github/**'
+              run: zip -r webapp.zip . -x 'tests/**' -x '.github/**' -x 'packer/**'
                 echo "Artifact created"
 
             - name: Upload build artifact
@@ -64,28 +58,16 @@ jobs:
     build-ami:
       runs-on: ubuntu-latest
       needs: build-artifact
-      environment: ${{ vars.ENVIRONMENT }}
 
       steps:
             - name: Check out repository code
               uses: actions/checkout@v4
-
-            - name: Configure AWS Credentials
-              uses: aws-actions/configure-aws-credentials@v4
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: ${{ secrets.AWS_REGION_DEV }}
 
             - name: Download application artifact
               uses: actions/download-artifact@v4
               with:
                 name: webapp
                 path: ./app
-
-            - name: Unzip application artifact
-              run: |
-                unzip ./app/webapp.zip -d /opt
 
             # Build the AMI using Packer
             - name: Build AMI with Packer
@@ -97,27 +79,24 @@ jobs:
                   -var 'ssh_username=${{ secrets.SSH_USERNAME }}' \
                   -var 'subnet_id=${{ secrets.SUBNET_ID }}' \
                   -var 'vpc_id=${{ secrets.VPC_ID }}' \
-                  -var 'aws_region=${{ secrets.AWS_REGION_DEV }}' \
-                  -var 'github_token=${{ secrets.TOKEN_GITHUB }}' \
-                  -var 'github_repo=${{ github.repository }}' \
+                  -var 'aws_region=${{ secrets.AWS_REGION }}' \
                   ./packer/aws-ubuntu.pkr.hcl
               env:
-                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                AWS_REGION: ${{ secrets.AWS_REGION_DEV }}
+                AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_DEV }}
+                AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEV }}
+                AWS_REGION: ${{ secrets.AWS_REGION }}
 
     instance-refresh:
       runs-on: ubuntu-latest
       needs: build-ami
-      environment: ${{ vars.ENVIRONMENT }}
 
       steps:
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v4
               with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: ${{ secrets.AWS_REGION_DEV }}
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
+                aws-region: ${{ secrets.AWS_REGION }}
       
             - name: Get Latest AMI ID
               id: ami
@@ -130,7 +109,6 @@ jobs:
               run: |
                 aws ec2 create-launch-template-version \
                   --launch-template-name ${{ secrets.LAUNCH_TEMPLATE_NAME }} \
-                  --version-description "New Launch Template version with latest AMI" \
                   --source-version 1 \
                   --launch-template-data "{\"ImageId\":\"${AMI_ID}\"}"
                 NEW_LT_VERSION=$(aws ec2 describe-launch-template-versions --launch-template-name ${{ secrets.LAUNCH_TEMPLATE_NAME }} --query "LaunchTemplateVersions[0].VersionNumber" --output text)
@@ -145,37 +123,6 @@ jobs:
             - name: Initiate Instance Refresh
               id: refresh
               run: |
-                REFRESH_ID=$(aws autoscaling start-instance-refresh \
+                aws autoscaling start-instance-refresh \
                   --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-                  --query "InstanceRefreshId" --output text)
-                echo "REFRESH_ID=${REFRESH_ID}" >> $GITHUB_ENV
-      
-            - name: Wait for Instance Refresh to Complete
-              run: |
-                TIMEOUT=600
-                ELAPSED=0
-                STATUS="InProgress"
-                while [ "$STATUS" == "InProgress" ]; do
-                  sleep 30
-                  ELAPSED=$((ELAPSED + 30))
-                  if [ $ELAPSED -ge $TIMEOUT ]; then
-                    echo "Instance refresh timed out after $ELAPSED seconds.."
-                    exit 1
-                  fi
-                  STATUS=$(aws autoscaling describe-instance-refreshes \
-                    --auto-scaling-group-name ${{ secrets.ASG_NAME }} \
-                    --query "InstanceRefreshes[?InstanceRefreshId=='${REFRESH_ID}'].Status" \
-                    --output text)
-                  if [ -z "$STATUS" ]; then
-                    echo "Failed to fetch instance refresh status. Exiting."
-                    exit 1
-                  fi
-                  echo "Current Status: $STATUS"
-                done
-
-                if [ "$STATUS" == "Successful" ]; then
-                  echo "Instance refresh completed successfully."
-                else
-                  echo "Instance refresh failed with status: $STATUS."
-                  exit 1
-                fi
+                  --query "InstanceRefreshId" --output text
