@@ -140,3 +140,5 @@ crash.log
 
 # For built boxes
 *.box
+
+*.zip
