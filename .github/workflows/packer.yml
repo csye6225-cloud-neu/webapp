@@ -1,9 +1,9 @@
 name: Packer CI Pipeline
 
-on: 
-  pull_request:
-    branches:
-      - main
+on:
+    pull_request:
+        branches:
+            - main
 
 jobs:
     packer:
@@ -30,5 +30,7 @@ jobs:
 
             - name: Run packer `validate`
               id: validate
-              run: "packer validate ."
+              run: |
+                  zip -r webapp.zip .
+                  packer validate .
               working-directory: ./packer
