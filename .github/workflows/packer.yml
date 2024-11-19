@@ -1,4 +1,4 @@
-name: Packer CI Pipeline
+name: Packer
 
 on:
     pull_request:
