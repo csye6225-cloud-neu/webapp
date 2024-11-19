@@ -45,7 +45,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Create zip artifact
-              run: zip -r webapp.zip . -x 'tests/**' -x '.github/**' -x 'packer/**'
+              run: zip -r webapp.zip . -x 'tests/**' -x '.git*/**'
                   echo "Artifact created"
 
             # Build the AMI using Packer
