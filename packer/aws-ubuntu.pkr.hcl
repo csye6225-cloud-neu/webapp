@@ -99,14 +99,13 @@ build {
       "sudo useradd -g csye6225 -s /usr/sbin/nologin csye6225",
 
       "sudo unzip webapp.zip -d /opt/webapp",
-      "cd /opt/webapp && sudo unzip webapp.zip",
       "sudo rm -f webapp.zip",
 
       # move the CloudWatch agent configuration file
       "sudo mv /opt/webapp/app/config/cloudwatch-agent.json /opt/cloudwatch-agent.json",
 
       "sudo chown -R csye6225:csye6225 /opt/webapp",
-      "sudo npm install",
+      "cd /opt/webapp && sudo npm install",
 
       # copy the systemd service file and enable it
       "sudo cp /opt/webapp/packer/systemd/app.service /etc/systemd/system/",
