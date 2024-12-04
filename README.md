@@ -4,7 +4,7 @@
 [![App CI Pipeline](https://github.com/csye6225-cloud-neu/webapp/actions/workflows/app-ci.yml/badge.svg)](https://github.com/csye6225-cloud-neu/webapp/actions/workflows/app-ci.yml)
 
 ## Overview
-This is a web application built with Node.js, Express, and Sequelize. It includes features such as user authentication, image upload to AWS S3, and verification via AWS SNS.
+This is a web application built with Node.js, Express, and Sequelize. It includes features such as user authentication, image upload to AWS S3, and verification via AWS SNS.   
 
 ## 1. Prerequisites
 
