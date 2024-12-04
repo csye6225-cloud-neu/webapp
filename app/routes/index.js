@@ -5,6 +5,7 @@ import verifyRoute from "./verify-route.js";
 const initializeRoutes = (app) => {
 
 	app.use('/healthz', healthzRoute);
+	app.use('/cicd', healthzRoute);
 	app.use('/v1/user', userRoute);
 	app.use('/verify', verifyRoute);
     // app.all("/*", healthzController.notFound); // Catch all other endpoints
